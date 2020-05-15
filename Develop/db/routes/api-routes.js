@@ -33,7 +33,6 @@ module.exports = function (app) {
         characters.push(newNote); 
 
         response.json(newNote); 
-       
-        
     }); 
+    
 };
