@@ -1,6 +1,6 @@
 const express = require("express"); 
-const htmlRoutes = require("./Develop/db/routes/html-routes");
-const apiRoutes = require("./Develop/db/routes/api-routes");
+const htmlRoutes = require("./Develop/routes/html-routes");
+const apiRoutes = require("./Develop/routes/api-routes");
 
 const app = express(); 
 const port = process.env.PORT || 3000; 
@@ -15,7 +15,6 @@ app.use(express.static("public"));
 htmlRoutes(app); 
 apiRoutes(app); 
 
-app.listen(PORT, function () {
-
-    console.log(`app listening on PORT : ${PORT}`); 
+app.listen(port, function () {
+    console.log(`app listening on PORT : ${port}`); 
 }); 

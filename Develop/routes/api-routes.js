@@ -1,6 +1,16 @@
-const data = require("../note-data");
+var fs = require("fs");
+const path = require("path");
+const notesDB = "../db/db.json";
+
+
 
 module.exports = function (app) {
+    app.get("/test", function (request, response) {
+        // console.log(`/ called`);
+        response.sendFile(path.join(__dirname, notesDB));
+        // response.sendFile(__dirname + "/public/index.html");
+    });
+    
     app.get("/api/notes", function (request, response){
         console.log(`/api/notes called`);
         response.json(notes); 
@@ -30,9 +40,10 @@ module.exports = function (app) {
     
         console.log(newNote); 
 
-        characters.push(newNote); 
+        notes.push(newNote); 
 
         response.json(newNote); 
     }); 
     
+    //To DO: add DELETE, 
 };
