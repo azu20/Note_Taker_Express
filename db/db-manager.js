@@ -1,6 +1,6 @@
 var fs = require("fs");
 const path = require("path");
-const dbFile = "./Develop/db/db.json";
+const dbFile = "./db/db.json";
 
 module.exports = (function (filePath) {
     //This will be our internal database, which the functions we are
