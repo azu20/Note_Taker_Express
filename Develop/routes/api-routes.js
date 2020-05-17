@@ -1,83 +1,107 @@
 var fs = require("fs");
 const path = require("path");
-// const DBpath =  require("../db/db.json");
+const DBpath = "./develop/db/db.json";
 
-const dbManager = ( 
-       function(path){
-            console.log("The function which initializes dbManager has run.");
-        
-            let notesDB = [];
-            fs.readFile((__dirname, "./develop/db/db.json"), 'utf8',  (err, fileContents) => {
-                if (err) {
-                    console.log("File read failed:", err)
-                    return;
-                }
-                notesDB = fileContents;
-               console.log(notesDB);
-            });
-            console.log(notesDB);
+const dbManager = (function (filePath) {
+    //This will be our internal database, which the functions we are
+    // exposing through this IIFE will have access to
+    let notesDB = Array.from([]);
 
 
-            function add(note){
+    fs.readFile((__dirname, filePath), 'utf8', (err, fileContents) => {
+        if (err) {
+            console.log("File read failed:", err)
+            return;
+        }
+        notesDB = JSON.parse(fileContents);
+    });
 
-                return note;
-            };
-            function remove(note){
-                console.log(path);
-                return note;
+    function dumpToFile(){
+        fs.writeFile((__dirname, filePath), JSON.stringify(notesDB), () => {
+            console.log("dumped the in-memory DB to the DB file");
+        });
+    };
+
+    function nextId(){
+        let highestCounter = 0;
+        for(const n of notesDB){
+            if (n.id > highestCounter) {
+                highestCounter = n.id;
             }
-            return {
-                "addNote": add,
-                "deleteNote": remove
-            };
-        }(path)
-);
+        };
+        return highestCounter + 1;
+    };
+
+    function add(note) {
+        //get the next ID
+        // set the id in the note to that next id
+        note.id =  nextId();
+        //add the note to the internal DB
+        notesDB.push(note);
+        dumpToFile();
+        return note;
+    };
+
+    function remove(noteId) {
+        for(let i = 0 ; i < notesDB.length; i++ ){
+            console.log(notesDB[i]);
+            if (notesDB[i].id === Number(noteId)){
+                notesDB.splice(notesDB[i],i);
+                dumpToFile();
+                return {"message": "Note deleted"};
+            }
+        };
+        return {"error": "The note with id: " + noteId + " was not found"};
+    };
+
+    function getAllNotes(){
+        return notesDB;
+    };
+    function getNote(noteId){
+        for(const n of notesDB){
+            if (n.id === Number(noteId)){
+                return n;
+            }
+        };
+        return {"error": "The note with id: " + noteId + " was not found"};
+    };
+    return {
+        "addNote": add,
+        "deleteNote": remove,
+        "all": getAllNotes,
+        "get": getNote
+    };
+})(DBpath);
 
 module.exports = function (app) {
 
-    app.post("/api/note", function (request, response) {
-        
+    app.post("/api/notes", function (request, response) {
+
         const thenote = request.body;
 
         const note = dbManager.addNote(thenote);
 
-        return response.json(note); 
+        return response.json(note);
 
     });
-    
-    // app.get("/api/notes", function (request, response){
-    //     console.log(`/api/notes called`);
-    //     response.json(notes); 
-    // }); 
 
-    // app.get("/api/notes/:id", function (request, response) {
-    //     console.log(`api/notes/:id${request.params.id} called`);
+    app.get("/api/notes", function (request, response) {
+        response.json(dbManager.all());
+    });
 
-    //     let noteId = request.params.id;
+    app.get("/api/notes/:id", function (request, response) {
 
-    //     for (let i = 0; i < notes.length; i ++) {
-    //         if (notes[i].id === notesId) {
-    //             console.log(notes[i]);
+        let noteId = request.params.id;
+        
+        return response.json(dbManager.get(noteId)); 
+        
+    });
 
-    //             return response.json(notes[i]);
-    //         }
+    app.delete("/api/notes/:id", function (request, response) {
 
-    //         return response.json(false); 
-    //     }
-    // });
-
-    // app.post("/api/notes", function (request, response) {
-    //     console.log(`POST /api/notes called`); 
-
-    //     const newNote = request.body;
-    //    newNote.id = (request.body.name.split (""))[0].toLowerCase(); 
-    
-    //     console.log(newNote); 
-
-    //     notes.push(newNote); 
-
-    //     response.json(newNote); 
-    // }); 
-    
-    //To DO: add DELETE, 
+        let noteId = request.params.id;
+        
+        return response.json(dbManager.deleteNote(noteId)); 
+        
+    }); 
 };
