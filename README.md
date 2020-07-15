@@ -4,6 +4,10 @@
 
 This app allows you to write, save, and delete notes. This application will use an express backend and save and retrieve note data from a JSON file.
 
+## Deployed website: 
+
+https://desolate-taiga-28699.herokuapp.com/ 
+
 ## User Story
 
 AS A user, I want to be able to write and save notes
